@@ -14,6 +14,9 @@ namespace Handover.Core
     /// </summary>
     public sealed class RescueLedger
     {
+        /// <summary>Hold epoch that no palm can match (holds created by an origin reset).</summary>
+        public const int NoBlendEpoch = int.MinValue;
+
         private readonly Dictionary<SlotRef, SlotState> _slots = new Dictionary<SlotRef, SlotState>();
         private readonly List<SlotRef> _slotOrder = new List<SlotRef>();
         private readonly int[] _berthCounts = new int[4];

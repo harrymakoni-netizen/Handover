@@ -286,9 +286,10 @@ namespace Handover.Core
             _ctx.Emit(new SimEvent(SimEventKind.TransferRolledBack, tx.Doll, tx.Id, tx.Source, tx.Target, code: (int)reason, value: tx.Progress));
         }
 
-        private void RecoverToHold(TransferTransaction tx, TransferEndReason reason, bool hasReturnHand, HandId returnHand)
+        private void RecoverToHold(TransferTransaction tx, TransferEndReason reason, bool hasReturnHand, HandId returnHand,
+            int holdEpoch)
         {
-            _ctx.Ledger.RecoverToHold(tx.Id, tx.CurrentPosition, hasReturnHand, returnHand, _ctx.ProviderEpoch);
+            _ctx.Ledger.RecoverToHold(tx.Id, tx.CurrentPosition, hasReturnHand, returnHand, holdEpoch);
             tx.Stage = TransferStage.Recovered;
             tx.EndReason = reason;
             _ctx.Emit(new SimEvent(SimEventKind.TransferRecovered, tx.Doll, tx.Id, tx.Source, tx.Target, code: (int)reason, value: tx.Progress));
@@ -340,13 +341,15 @@ namespace Handover.Core
                     continue;
                 }
 
-                if (!tx.HasTakenOff || !tx.PastMidpoint)
+                if (!tx.HasTakenOff || !tx.PastMidpoint || tx.Source.IsDock)
                 {
+                    // Before the midpoint, or when boarding from a dock (always a valid place to
+                    // return to), the doll goes back to its source.
                     Rollback(tx, TransferEndReason.TrackingLost);
                 }
                 else if (tx.Target.IsPalm && tx.Target.Hand == hand)
                 {
-                    RecoverToHold(tx, TransferEndReason.TrackingLost, true, hand);
+                    RecoverToHold(tx, TransferEndReason.TrackingLost, true, hand, _ctx.Palm(hand).OriginEpoch);
                 }
                 else
                 {
@@ -383,7 +386,7 @@ namespace Handover.Core
                     else
                     {
                         bool palmTarget = tx.Target.IsPalm;
-                        RecoverToHold(tx, reason, palmTarget, palmTarget ? tx.Target.Hand : HandId.Left);
+                        RecoverToHold(tx, reason, palmTarget, palmTarget ? tx.Target.Hand : HandId.Left, _ctx.ProviderEpoch);
                     }
                 }
             }
@@ -395,7 +398,7 @@ namespace Handover.Core
         /// Origin reset: invalidate every active connection before movement is processed.
         /// Hops that have passed the midpoint cannot blend back across epochs, so they are held.
         /// </summary>
-        public void InvalidateForOriginChange()
+        public void InvalidateForOriginChange(int holdEpoch)
         {
             for (int i = 0; i < _active.Count; i++)
             {
@@ -407,7 +410,7 @@ namespace Handover.Core
                 else
                 {
                     bool palmTarget = tx.Target.IsPalm;
-                    RecoverToHold(tx, TransferEndReason.OriginChanged, palmTarget, palmTarget ? tx.Target.Hand : HandId.Left);
+                    RecoverToHold(tx, TransferEndReason.OriginChanged, palmTarget, palmTarget ? tx.Target.Hand : HandId.Left, holdEpoch);
                 }
             }
 
