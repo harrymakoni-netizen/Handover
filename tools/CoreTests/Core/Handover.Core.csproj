@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Compiles the engine-free Handover.Core assembly exactly as Unity sees it:
+    .NET Standard 2.1 API surface and C# 9. Unity compiles the same files through
+    Assets/Handover/Runtime/Core/Handover.Core.asmdef; this project exists so the
+    deterministic rules can be built and tested without the Unity Editor.
+  -->
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>disable</Nullable>
+    <AssemblyName>Handover.Core</AssemblyName>
+    <RootNamespace>Handover.Core</RootNamespace>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../../Assets/Handover/Runtime/Core/**/*.cs" />
+  </ItemGroup>
+</Project>

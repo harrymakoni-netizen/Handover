@@ -1,0 +1,63 @@
+# ---- Unity generated -------------------------------------------------------
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Mm]emoryCaptures/
+/[Rr]ecordings/
+
+# Asset Store tools and crash reports
+/[Aa]ssets/AssetStoreTools*
+/[Aa]ssets/Plugins/Editor/JetBrains*
+sysinfo.txt
+crashlytics-build.properties
+mono_crash.*
+
+# Unity-generated IDE project files
+.vs/
+.vscode/
+.idea/
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+ExportedObj/
+.consulo/
+
+# Build output
+*.apk
+*.aab
+*.unitypackage
+*.app
+
+# OS noise
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ---- Engine-free core test harness (tools/) ------------------------------
+# These project files are hand-written and must be tracked, unlike Unity's
+# generated *.csproj above.
+!/tools/**/*.csproj
+/tools/**/bin/
+/tools/**/obj/
+/tools/**/TestResults/
+
+# ---- Local secrets -----------------------------------------------------------
+# Keystores and credentials never enter source control.
+*.keystore
+*.jks
+.env

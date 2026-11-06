@@ -1,0 +1,41 @@
+# Normalize text files to LF in the repository.
+* text=auto eol=lf
+
+# Source and configuration
+*.cs        text diff=csharp
+*.asmdef    text
+*.asmref    text
+*.json      text
+*.md        text
+*.txt       text
+*.sh        text eol=lf
+
+# Unity YAML (text serialization). Merge with Unity's Smart Merge if configured;
+# otherwise treat conflicts by hand - never auto-merge scenes and prefabs blindly.
+*.unity     text merge=unityyamlmerge
+*.prefab    text merge=unityyamlmerge
+*.asset     text merge=unityyamlmerge
+*.mat       text merge=unityyamlmerge
+*.anim      text merge=unityyamlmerge
+*.controller text merge=unityyamlmerge
+*.meta      text merge=unityyamlmerge
+*.physicMaterial text merge=unityyamlmerge
+*.shadergraph text
+
+# Binary assets
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.psd  binary
+*.tga  binary
+*.exr  binary
+*.hdr  binary
+*.wav  binary
+*.ogg  binary
+*.mp3  binary
+*.fbx  binary
+*.blend binary
+*.ttf  binary
+*.otf  binary
+*.docx binary
+*.pdf  binary
