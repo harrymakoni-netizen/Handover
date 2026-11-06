@@ -50,6 +50,9 @@ namespace Handover.Core
             Transfers = new TransferCoordinator(Context);
             Resolver = new HopResolver(Context, Transfers);
             Director = new ChapterDirector(Context);
+            Flood = new FloodHazardService(Context, Director.State);
+            Director.Flood = Flood;
+            ShieldEngaged = Flood.IsShieldEngaged;
             Checkpoints = new CheckpointService(Ledger);
             Context.Policy = _policyOverride ?? Director;
         }
@@ -63,10 +66,11 @@ namespace Handover.Core
         public TransferCoordinator Transfers { get; }
         public HopResolver Resolver { get; }
         public ChapterDirector Director { get; }
+        public FloodHazardService Flood { get; }
         public CheckpointService Checkpoints { get; }
         public StageLayout Stage => Context.Stage;
         public InteractionTuning Tuning => Context.Tuning;
-        public HandoverSettings Settings { get; private set; } = new HandoverSettings();
+        public HandoverSettings Settings => Context.Settings;
 
         /// <summary>
         /// Events since the previous <see cref="Step"/> began: those raised by commands issued
@@ -129,12 +133,18 @@ namespace Handover.Core
 
         public void ApplySettings(HandoverSettings settings)
         {
-            Settings = (settings ?? new HandoverSettings()).Clone();
-            InteractionTuning effective = Settings.SteadyMode ? _baseTuning.WithSteadyMode() : _baseTuning;
+            HandoverSettings previous = Context.Settings;
+            Context.Settings = (settings ?? new HandoverSettings()).Clone();
+            InteractionTuning effective = Context.Settings.SteadyMode ? _baseTuning.WithSteadyMode() : _baseTuning;
             Context.Tuning = effective;
             foreach (PalmPlatform p in Palms)
             {
                 p.SetTuning(effective);
+            }
+
+            if (previous == null || previous.RelaxedMode != Context.Settings.RelaxedMode || previous.ShelterAssist != Context.Settings.ShelterAssist)
+            {
+                Flood.OnSettingsChanged();
             }
         }
 
@@ -192,7 +202,31 @@ namespace Handover.Core
             // 6. Apply committed objectives exactly once per transaction id.
             ProcessCommitted();
 
+            // 7. Resolve pending flood events (queued refuge closure) and exposure.
+            if (Session.IsGameplayRunning)
+            {
+                Flood.Step(simDt);
+                if (Flood.ResetRequested)
+                {
+                    ResetAfterExposure();
+                }
+            }
+
+            // 8. Checkpoints requested by committed objectives, after flood resolution.
+            while (Director.TakeCheckpointRequest(out string label))
+            {
+                CreateCheckpoint(label);
+            }
+
             _publishedEventCount = _events.Count;
+        }
+
+        /// <summary>Two seconds of continuous exposure restores the latest complete checkpoint.</summary>
+        private void ResetAfterExposure()
+        {
+            int resets = Director.State.ExposureResets + 1;
+            RestoreCheckpoint(Checkpoints.LatestValid());
+            Director.State.ExposureResets = resets;
         }
 
         private int _processedCommits;
@@ -579,6 +613,7 @@ namespace Handover.Core
 
             Ledger.Restore(placements);
             Director.RestoreState(target.State);
+            Flood.OnRestored();
             foreach (PalmPlatform palm in Palms)
             {
                 palm.ResetContinuity();
@@ -659,6 +694,7 @@ namespace Handover.Core
             Resolver.ResetHysteresis();
             Ledger.ResetToDeparture();
             Director.ResetChapter();
+            Flood.ResetForChapter();
             Checkpoints.Clear();
             _recoveryHands[0] = false;
             _recoveryHands[1] = false;

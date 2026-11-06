@@ -27,6 +27,7 @@ namespace Handover.Core
         public InteractionTuning Tuning { get; internal set; }
         public IDockPolicy Policy { get; internal set; }
         public StageLayout Stage { get; internal set; }
+        public HandoverSettings Settings { get; internal set; } = new HandoverSettings();
         public int ProviderEpoch { get; internal set; }
 
         public PalmPlatform Palm(HandId hand) => Palms[(int)hand];

@@ -216,9 +216,27 @@ namespace Handover.Tests
 
         // ---- scripted actions ----------------------------------------------------
 
+        /// <summary>A hand that just used this dock must leave it before the dock re-arms (as a player would).</summary>
+        private void MoveAwayIfRearmPending(HandId hand, DockId dock)
+        {
+            if (Sim.Resolver.DockNeedsSeparation(hand, dock))
+            {
+                ParkHand(hand);
+                Settle(0.2f);
+            }
+        }
+
+        /// <summary>Support point the hand has been commanded to (before the next step filters it).</summary>
+        public Vector3 CommandedSupport(HandId hand)
+        {
+            Pose3 pose = Hands.GetPose(hand);
+            return pose.Position + pose.Up * Tuning.SupportHeight;
+        }
+
         /// <summary>Boards a doll from a berth onto a palm and waits for the commit.</summary>
         public void Board(HandId hand, DockId dock, int berth, DollId expected)
         {
+            MoveAwayIfRearmPending(hand, dock);
             OfferPalmAtBerth(hand, dock, berth);
             bool ok = RunUntil(() => IsOnPalm(expected, hand), 3f);
             Assert.IsTrue(ok, $"{expected} did not board {hand} from {dock.Code()}[{berth}]; owner {Owner(expected)}");
@@ -244,6 +262,7 @@ namespace Handover.Tests
         /// <summary>Deposits the riding doll at a berth and waits for the commit.</summary>
         public void Deposit(HandId hand, DollId doll, DockId dock, int berth)
         {
+            MoveAwayIfRearmPending(hand, dock);
             OfferPalmAtBerth(hand, dock, berth);
             bool ok = RunUntil(() => IsAtBerth(doll, dock, berth), 3f);
             Assert.IsTrue(ok, $"{doll} was not deposited at {dock.Code()}[{berth}]; owner {Owner(doll)}");
