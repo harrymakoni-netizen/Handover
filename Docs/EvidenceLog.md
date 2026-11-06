@@ -66,3 +66,18 @@ Editor or simulator run as a headset result.
   returns each held passenger to its last safe berth (else its own Departure
   berth) rather than rewinding the whole chapter, so tracking loss never costs
   progress (Section 2: "Lost tracking never costs progress").
+
+### T05 — tabletop stage fitting
+
+- Result: 121 passed, 0 failed (`./tools/run-core-tests.sh`).
+- Covers: permission declined and no table fall back to a virtual tabletop that
+  passes validation; small, distant, too high and too low tables are rejected
+  with a reason; a typical desk fits the Standard layout inside its edges with a
+  4 cm margin; a smaller table uses the Compact variant; a rotated table aligns
+  the stage with the edge facing the player; the best of several surfaces is
+  chosen; every dock is within seated reach and the 58 x 54 degree budget; a
+  stage under the eyes or beyond reach fails validation; resize stays within the
+  variant's tested limits; recenter drift beyond 3 cm or 4 degrees requires
+  repositioning; a fitted layout runs the same chapter rules.
+- Not verified: real MRUK scene data, actual seated reach and the real view.
+  Reach uses head distance as a proxy for shoulder reach.
