@@ -110,3 +110,18 @@ Editor or simulator run as a headset result.
   two to four tests fail.
 - Not verified: whether a real palm-down hand beside the carrier is readable and
   free of occlusion (Section 19 risk). Shelter assist is the planned fallback.
+
+### T08 (engine-free part) — cue ownership and presentation state
+
+- Result: 158 passed, 0 failed.
+- Covers: a tilt threshold toggling every frame produces at most one warning per
+  second; tracking recovery outranks and briefly ducks tilt warnings; warning
+  and rain loops stop while paused or recovering; menu feedback outranks
+  gameplay cues; the harbour melody plays one phrase per rescue (1, 2, 3) and
+  the completion melody once over a full route. Presentation: Waiting, an
+  immediate lean when a palm is offered (then more as dwell builds),
+  Anticipating, Hopping with arc progress, Riding at the palm support,
+  Sheltering (crouch) on tilt without sliding, Suspended in the system hold,
+  Rescued at the harbour.
+- Not verified: how the cues sound and whether the animation reads well; that
+  needs the Unity presenters and people.
