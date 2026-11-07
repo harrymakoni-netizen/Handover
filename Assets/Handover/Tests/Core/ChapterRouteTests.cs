@@ -159,6 +159,28 @@ namespace Handover.Tests
         }
 
         [Test]
+        public void TheSameHandBoardsAnotherBerthOfTheDockWithoutMovingAway()
+        {
+            var rig = new TestRig();
+            rig.OfferPalmAtBerth(HandId.Right, DockId.Departure, 0);
+            Assert.IsTrue(rig.RunUntil(() => rig.IsOnPalm(DollId.Keeper, HandId.Right), 3f));
+
+            // Teaching hop with the palms raised a little above the dock, still inside its dry area.
+            Vector3 raised = rig.CommandedSupport(HandId.Right) + new Vector3(0f, 0.08f, 0f);
+            rig.SetSupport(HandId.Right, raised);
+            rig.SetSupport(HandId.Left, rig.BesidePalm(raised, 0.02f, -1f));
+            Assert.IsTrue(rig.RunUntil(() => rig.IsOnPalm(DollId.Keeper, HandId.Left), 3f));
+            Assert.IsTrue(rig.Resolver().DockNeedsSeparation(HandId.Right, DockId.Departure),
+                "the right palm has not yet moved away from Keeper's berth");
+
+            // Pip's berth is a different berth: it is offered at once, without leaving the dock.
+            rig.OfferPalmAtBerth(HandId.Right, DockId.Departure, 1);
+            Assert.IsTrue(rig.RunUntil(() => rig.IsOnPalm(DollId.Pip, HandId.Right), 3f),
+                "re-arm applies to the berth just used, not to the whole dock");
+            Assert.IsTrue(rig.IsAtBerth(DollId.Luma, DockId.Departure, 2));
+        }
+
+        [Test]
         public void TheHarbourStaysDarkUntilKeeperHoldsTheLantern()
         {
             var rig = new TestRig();

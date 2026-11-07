@@ -65,6 +65,8 @@ namespace Handover.Tests
             return v;
         }
 
+        public HopResolver Resolver() => Sim.Resolver;
+
         public StageLayout Stage => Sim.Stage;
         public InteractionTuning Tuning => Sim.Tuning;
         public RescueLedger Ledger => Sim.Ledger;

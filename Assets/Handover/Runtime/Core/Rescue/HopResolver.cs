@@ -64,10 +64,11 @@ namespace Handover.Core
         private readonly HashSet<DollId> _usedDolls = new HashSet<DollId>();
         private readonly Dictionary<int, double> _lastRejectCue = new Dictionary<int, double>();
         private readonly List<PendingReject> _pendingRejects = new List<PendingReject>();
-        // Re-arm hysteresis: after a transfer lands, the same palm/dock (or palm pair) must
-        // separate beyond the disconnect gap before another transfer between them is offered,
-        // so a hand held still never ping-pongs a doll back.
-        private readonly bool[,] _dockNeedsSeparation = new bool[2, 4];
+        // Re-arm hysteresis: after a transfer between a palm and a berth lands, that palm must
+        // move beyond the disconnect gap from that berth before it can transfer with the same
+        // berth again (and a palm pair must separate before hopping back), so a hand held still
+        // never ping-pongs a doll. Other berths of the same dock stay available at once.
+        private readonly SlotRef[] _rearmBerth = new SlotRef[2];
         private bool _pairNeedsSeparation;
 
         private readonly struct PendingReject
@@ -104,11 +105,11 @@ namespace Handover.Core
             }
             else if (tx.Source.IsPalm)
             {
-                _dockNeedsSeparation[(int)tx.Source.Hand, (int)tx.Target.Dock] = true;
+                _rearmBerth[(int)tx.Source.Hand] = tx.Target;
             }
             else if (tx.Target.IsPalm)
             {
-                _dockNeedsSeparation[(int)tx.Target.Hand, (int)tx.Source.Dock] = true;
+                _rearmBerth[(int)tx.Target.Hand] = tx.Source;
             }
         }
 
@@ -116,12 +117,21 @@ namespace Handover.Core
         public void ResetHysteresis()
         {
             _pairNeedsSeparation = false;
-            System.Array.Clear(_dockNeedsSeparation, 0, _dockNeedsSeparation.Length);
+            _rearmBerth[0] = SlotRef.None;
+            _rearmBerth[1] = SlotRef.None;
         }
 
         public bool PairNeedsSeparation => _pairNeedsSeparation;
 
-        public bool DockNeedsSeparation(HandId hand, DockId dock) => _dockNeedsSeparation[(int)hand, (int)dock];
+        /// <summary>True while this palm must move away from this berth before using it again.</summary>
+        public bool NeedsSeparation(HandId hand, SlotRef berth) => berth.IsDock && _rearmBerth[(int)hand] == berth;
+
+        /// <summary>True while this palm's re-arm berth belongs to the dock.</summary>
+        public bool DockNeedsSeparation(HandId hand, DockId dock)
+        {
+            SlotRef b = _rearmBerth[(int)hand];
+            return b.IsDock && b.Dock == dock;
+        }
 
         private void UpdateRearm()
         {
@@ -139,19 +149,17 @@ namespace Handover.Core
 
             foreach (HandId hand in Ids.Hands)
             {
-                PalmPlatform palm = _ctx.Palm(hand);
-                foreach (DockId dock in Ids.Docks)
+                SlotRef berth = _rearmBerth[(int)hand];
+                if (!berth.IsDock)
                 {
-                    if (!_dockNeedsSeparation[(int)hand, (int)dock])
-                    {
-                        continue;
-                    }
+                    continue;
+                }
 
-                    SupportGeometry.Measurement nearest = NearestBerth(_ctx.Stage.Dock(dock), palm, t);
-                    if (!palm.IsTracked || nearest.EdgeGap > t.DisconnectGap || nearest.VerticalOffset > t.HoldVerticalOffset * 2f)
-                    {
-                        _dockNeedsSeparation[(int)hand, (int)dock] = false;
-                    }
+                PalmPlatform palm = _ctx.Palm(hand);
+                SupportGeometry.Measurement m = SupportGeometry.PalmToBerth(palm, _ctx.Stage.BerthPosition(berth), t);
+                if (!palm.IsTracked || m.EdgeGap > t.DisconnectGap || m.VerticalOffset > t.HoldVerticalOffset * 2f)
+                {
+                    _rearmBerth[(int)hand] = SlotRef.None;
                 }
             }
         }
@@ -225,17 +233,12 @@ namespace Handover.Core
             RescueLedger ledger = _ctx.Ledger;
             foreach (DockId dock in Ids.Docks)
             {
-                if (_dockNeedsSeparation[(int)hand, (int)dock])
-                {
-                    continue;
-                }
-
                 DockLayout layout = _ctx.Stage.Dock(dock);
                 for (int b = 0; b < layout.Capacity; b++)
                 {
                     SlotRef berth = SlotRef.DockBerth(dock, b);
                     SlotState s = ledger.Get(berth);
-                    if (!s.IsOccupied || _transfers.IsSlotBusy(berth))
+                    if (!s.IsOccupied || _transfers.IsSlotBusy(berth) || NeedsSeparation(hand, berth))
                     {
                         continue;
                     }
@@ -306,13 +309,14 @@ namespace Handover.Core
             RescueLedger ledger = _ctx.Ledger;
             foreach (DockId dock in Ids.Docks)
             {
-                if (_dockNeedsSeparation[(int)hand, (int)dock])
+                DockLayout layout = _ctx.Stage.Dock(dock);
+                int berthIndex = ChooseDepositBerth(layout, dock, doll, palm, t, out SupportGeometry.Measurement m);
+                if (berthIndex >= 0 && NeedsSeparation(hand, SlotRef.DockBerth(dock, berthIndex)))
                 {
+                    // The palm just used this berth; it must move away before using it again.
                     continue;
                 }
 
-                DockLayout layout = _ctx.Stage.Dock(dock);
-                int berthIndex = ChooseDepositBerth(layout, dock, doll, palm, t, out SupportGeometry.Measurement m);
                 RejectReason reason = _ctx.Policy.CanDeposit(doll, dock);
                 if (reason == RejectReason.None && berthIndex < 0)
                 {
