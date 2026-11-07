@@ -1,0 +1,28 @@
+{
+    "name": "Handover.Platform.Meta",
+    "rootNamespace": "Handover.MetaPlatform",
+    "references": [
+        "Handover.Core",
+        "Handover.Runtime",
+        "Oculus.Interaction",
+        "Oculus.VR",
+        "meta.xr.mrutilitykit"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "HANDOVER_META_SDK"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.meta.xr.sdk.interaction.ovr",
+            "expression": "207.0.0",
+            "define": "HANDOVER_META_SDK"
+        }
+    ],
+    "noEngineReferences": false
+}

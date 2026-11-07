@@ -1,0 +1,36 @@
+{
+    "name": "Handover.Editor.Meta",
+    "rootNamespace": "Handover.EditorTools.MetaSetup",
+    "references": [
+        "Handover.Core",
+        "Handover.Runtime",
+        "Handover.Platform.Meta",
+        "Handover.Editor",
+        "UnityEngine.UI",
+        "Oculus.Interaction",
+        "Oculus.Interaction.Editor",
+        "Oculus.Interaction.OVR.Editor",
+        "Oculus.VR",
+        "Oculus.VR.Editor",
+        "meta.xr.mrutilitykit"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "HANDOVER_META_SDK"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.meta.xr.sdk.interaction.ovr",
+            "expression": "207.0.0",
+            "define": "HANDOVER_META_SDK"
+        }
+    ],
+    "noEngineReferences": false
+}

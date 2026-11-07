@@ -65,7 +65,20 @@ These were read from the 207.0.1 package sources, not from memory:
   `MRUKRoom.Anchors`, `MRUKAnchor.Label` (`SceneLabels.TABLE`),
   `MRUKAnchor.PlaneRect` (`Rect?`, in the anchor's local XY plane).
 - Assembly names: `Oculus.VR`, `Oculus.Interaction`, `Oculus.Interaction.OVR`,
-  `meta.xr.mrutilitykit`.
+  `meta.xr.mrutilitykit`; Editor: `Oculus.Interaction.Editor`,
+  `Oculus.Interaction.OVR.Editor`, `Oculus.VR.Editor`.
+- Quick Actions: `OVRQuickActionsAPI.AddOVRInteractionRig(bool generateAsEditableCopy = true)`,
+  `QuickActionsAPI.AddRayCanvasInteraction(GameObject, bool)` and
+  `AddPokeCanvasInteraction(GameObject, bool)`.
+- `OVRProjectConfig.CachedProjectConfig`, `CommitProjectConfig`, `handTrackingSupport`,
+  `sceneSupport`, `insightPassthroughSupport`; `OVRManager.isInsightPassthroughEnabled`.
+- MRUK `RegisterSceneLoadedCallback` invokes the callback immediately when the scene is
+  already loaded.
+- Input System 1.20.1: `Keyboard.current`, `Keyboard[Key]` returning `KeyControl`
+  (a `ButtonControl` with `isPressed` and `wasPressedThisFrame`).
+
+These are the members the code uses; their signatures are mirrored in
+`tools/unity-compile-check/stubs/` for the compile check.
 
 ## Engine-free test toolchain (not shipped)
 

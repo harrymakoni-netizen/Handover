@@ -1,0 +1,20 @@
+{
+    "name": "Handover.Editor",
+    "rootNamespace": "Handover.EditorTools",
+    "references": [
+        "Handover.Core",
+        "Handover.Runtime",
+        "UnityEngine.UI"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

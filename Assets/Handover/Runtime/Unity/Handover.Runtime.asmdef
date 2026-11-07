@@ -1,0 +1,18 @@
+{
+    "name": "Handover.Runtime",
+    "rootNamespace": "Handover.Unity",
+    "references": [
+        "Handover.Core",
+        "UnityEngine.UI",
+        "Unity.InputSystem"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

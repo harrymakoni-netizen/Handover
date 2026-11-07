@@ -9,7 +9,7 @@ Editor or simulator run as a headset result.
 
 | Gate | Deterministic (.NET / EditMode) | Editor / XR Simulator | Hardware (Quest 3) |
 | --- | --- | --- | --- |
-| A Setup | Keeper boarding starts play exactly once (tests) | **Not run** — needs Unity 6000.3.28f1 on a developer machine | Not run |
+| A Setup | Keeper boarding starts play exactly once (tests); Unity-side code compiles against Unity 6000.3.28f1 assemblies (not in the Editor) | **Not run** — needs Unity 6000.3.28f1 on a developer machine ([Setup.md](Setup.md)) | Not run |
 | B Carry and hop | 40 scripted hops, all three dolls, both directions; no loss, duplicate owner or leaked slot | Not run | Not run |
 | C Chapter logic | Both rescue orders and the replay solution finish; tutorial, pause, queued R closure and every checkpoint stay consistent (with weather) | Not run | Not run |
 | D Hardware | — | — | Not run (no headset available) |
@@ -125,3 +125,32 @@ Editor or simulator run as a headset result.
   Rescued at the harbour.
 - Not verified: how the cues sound and whether the animation reads well; that
   needs the Unity presenters and people.
+
+### Unity integration layer — compile check only
+
+- What exists: `Handover.Runtime` (HandoverApp composition root, keyboard and
+  transform hand sources, greybox stage, peg dolls, palm feedback, procedural
+  audio through the cue arbiter, hand menu, debug HUD), `Handover.Platform.Meta`
+  (Interaction SDK hand adapter, OVRManager lifecycle bridge, MRUK table source)
+  and two Editor scene builders (Meta XR Bootstrap scene, keyboard greybox scene).
+- Evidence: `tools/unity-compile-check/run.sh` built every Unity-side assembly with
+  the .NET SDK against the **Unity 6000.3.28f1 Linux editor's** module DLLs, with
+  `UnityEngine.UI` compiled from that editor's bundled uGUI source, in seven
+  variants (Android player with the new Input System, with legacy input, Editor;
+  Meta adapter player and Editor; both Editor tool assemblies), warnings as errors.
+  All passed. Input System and Meta SDK members come from signature stubs copied
+  from com.unity.inputsystem 1.20.1 and Meta XR SDK 207.0.1 sources.
+- Not verified (needs a person with the Editor): asmdef resolution, serialization,
+  Play mode, Interaction SDK wiring asserts, the scene builders, the Project Setup
+  Tool, the XR Simulator, an Android build, and anything on a headset.
+
+### Re-arm rule narrowed to the berth just used
+
+- Found by tracing the keyboard walkthrough in Setup.md: the re-arm rule was keyed
+  by (hand, dock), so a hand that boarded Keeper from Departure could not board
+  Pip from the neighbouring Departure berth until it moved 7 cm away. Now keyed by
+  (hand, berth): only the berth just used needs separation.
+- Evidence: 163 passed. New `TheSameHandBoardsAnotherBerthOfTheDockWithoutMovingAway`
+  fails with the old per-dock rule (mutation check) and passes now;
+  `KeyboardWalkthroughTests` replays the documented key sequence with the driver's
+  placement maths and completes the chapter.

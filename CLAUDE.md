@@ -49,10 +49,11 @@ documentation and installed package definitions rather than guessed API names.
 | `Assets/Handover/Runtime/Core` | `Handover.Core` assembly. Deterministic rescue simulation. **No UnityEngine references** (`noEngineReferences: true`); math is `System.Numerics`. Everything that decides ownership, rules, flood, recovery and saves lives here. |
 | `Assets/Handover/Runtime/Unity` | `Handover.Runtime` assembly. MonoBehaviours that feed poses in, step the simulation once per frame and render state (greybox views, audio). Presentation never writes ownership. |
 | `Assets/Handover/Runtime/Meta` | `Handover.Platform.Meta` assembly. The only place Meta SDK types appear (Interaction SDK hands, OVRManager lifecycle, MRUK tables). Compiles only when the Meta packages are installed. |
-| `Assets/Handover/Editor` | Editor-only tooling (scene builder, project setup helpers). |
+| `Assets/Handover/Editor` | Editor-only tooling: `Handover > Create Meta XR Bootstrap Scene` (Interaction SDK rig via Quick Actions, passthrough, MRUK, hand menu) and `Handover > Create Greybox Scene` (keyboard palms). |
 | `Assets/Handover/Content` | Authored content (scenes, ScriptableObject definitions, audio, art). |
 | `Assets/Handover/Tests/Core` | NUnit EditMode tests for `Handover.Core`. The same files also run outside Unity (see below). |
 | `tools/CoreTests` | .NET projects that compile `Handover.Core` as `netstandard2.1` (Unity's API level, C# 9) and run the shared NUnit tests with `dotnet test`. |
+| `tools/unity-compile-check` | Builds the Unity-side assemblies with the .NET SDK against a Unity 6000.3 editor's DLLs (no licence needed) plus signature stubs for the Input System and Meta SDK. |
 | `Docs/` | Specification, versions, evidence log, remote test sheet. |
 
 ## Commands
@@ -63,6 +64,16 @@ documentation and installed package definitions rather than guessed API names.
 ```
 
 Inside Unity: Window > General > Test Runner > EditMode runs the same tests.
+
+```bash
+# Unity-side assemblies, without opening Unity (pass the editor's Editor/Data folder).
+./tools/unity-compile-check/run.sh /path/to/Unity-6000.3.28f1/Editor/Data
+```
+
+If you call a new Meta SDK or Input System member from Unity-side code, read it in the
+installed package source first, then add its exact signature to
+`tools/unity-compile-check/stubs/` so the check keeps covering it. A compile check is
+not an Editor run: still open the project and enter Play mode before claiming T01.
 
 ## Conventions the code relies on
 
