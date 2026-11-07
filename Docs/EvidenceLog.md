@@ -150,7 +150,10 @@ Editor or simulator run as a headset result.
   by (hand, dock), so a hand that boarded Keeper from Departure could not board
   Pip from the neighbouring Departure berth until it moved 7 cm away. Now keyed by
   (hand, berth): only the berth just used needs separation.
-- Evidence: 163 passed. New `TheSameHandBoardsAnotherBerthOfTheDockWithoutMovingAway`
+- Correction: commit `0f63ca8`'s message says "162 passed at this commit"; re-run in a
+  clean worktree of that commit, the suite has **159** tests, all passing (the caption and
+  walkthrough tests arrived in `47a8906`).
+- Evidence: 163 passed at `47a8906`. New `TheSameHandBoardsAnotherBerthOfTheDockWithoutMovingAway`
   fails with the old per-dock rule (mutation check) and passes now;
   `KeyboardWalkthroughTests` replays the documented key sequence with the driver's
   placement maths and completes the chapter.
