@@ -33,9 +33,15 @@ scope `com.meta.xr`), declared as a scoped registry in the manifest.
 | `com.unity.ugui` | bundled with the editor | Core package (2.0.0 on 6000.3, includes TextMesh Pro); see the lockfile. |
 | `com.unity.ide.rider` / `com.unity.ide.visualstudio` | 3.1.0 / 2.0.29 | Editor convenience only. |
 
-`Packages/packages-lock.json` does **not** exist yet. Unity writes it on the
-first open; commit it together with the regenerated `ProjectSettings/*.asset`
-files (Section 10: "commit both package manifest and lockfile").
+`Packages/packages-lock.json` was written on the first open (8 Nov, Unity 6000.6.8f1)
+and is committed. Resolved there: Meta XR Core / Interaction / Interaction OVR / MRUK
+**207.0.1**, OpenXR **1.18.0**, Input System **1.20.1**, XR Plug-in Management **4.7.0**
+(Unity raised it from 4.6.1), XR Hands **1.9.0**, AI Navigation 2.0.16, and the
+editor-bundled URP / SRP Core **17.6.0**, Test Framework **1.8.0**, uGUI **2.6.0**.
+Unity 6.6 also adjusted the module list (added `physicscore2d`, `tetgen`,
+`timelinefoundation`; dropped `vr`). The compile check in `tools/unity-compile-check`
+still builds against the 6000.3.28f1 assemblies, so treat it as a name and signature
+check only.
 
 ### Meta XR Simulator
 

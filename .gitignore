@@ -23,6 +23,7 @@ mono_crash.*
 *.csproj
 *.unityproj
 *.sln
+*.slnx
 *.suo
 *.tmp
 *.user

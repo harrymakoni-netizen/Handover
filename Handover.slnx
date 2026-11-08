@@ -1,8 +1,0 @@
-﻿<Solution>
-  <Project Path="Handover.Runtime.csproj" />
-  <Project Path="Handover.Core.Tests.csproj" />
-  <Project Path="Handover.Core.csproj" />
-  <Project Path="Handover.Platform.Meta.csproj" />
-  <Project Path="Handover.Editor.csproj" />
-  <Project Path="Handover.Editor.Meta.csproj" />
-</Solution>
