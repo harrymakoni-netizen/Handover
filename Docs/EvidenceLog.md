@@ -9,7 +9,7 @@ Editor or simulator run as a headset result.
 
 | Gate | Deterministic (.NET / EditMode) | Editor / XR Simulator | Hardware (Quest 3) |
 | --- | --- | --- | --- |
-| A Setup | Keeper boarding starts play exactly once (tests); Unity-side code compiles against Unity 6000.3.28f1 assemblies | **Partial (8 Nov):** opened in Unity 6000.6.8f1 on Windows, compiled, greybox scene built and ran in Play mode. Still to do: EditMode tests in Unity, URP, Bootstrap scene, XR Simulator, Android build | Not run |
+| A Setup | Keeper boarding starts play exactly once (tests); Unity-side code compiles against Unity 6000.3.28f1 assemblies | **Partial (8 Nov):** opened in Unity 6000.6.8f1 on Windows, compiled, greybox scene built and ran in Play mode; URP asset assigned. Bootstrap builder failed on its first run (fixed, not yet re-run). Still to do: EditMode tests in Unity, Bootstrap scene, XR Simulator, Android build | Not run |
 | B Carry and hop | 40 scripted hops, all three dolls, both directions; no loss, duplicate owner or leaked slot | Not run | Not run |
 | C Chapter logic | Both rescue orders and the replay solution finish; tutorial, pause, queued R closure and every checkpoint stay consistent (with weather) | Not run | Not run |
 | D Hardware | — | — | Not run (no headset available) |
@@ -174,3 +174,23 @@ Editor or simulator run as a headset result.
 - Meta's Project Setup Tool reported 4 outstanding items (expected before Fix All).
 - Not yet observed: EditMode tests in Unity, a full keyboard chapter, the Bootstrap
   scene, the XR Simulator, an APK.
+
+### First Bootstrap scene build (developer machine, 8 Nov 2026)
+
+- Environment: Windows, Unity 6000.6.8f1, Android platform. Evidence: one screenshot.
+- Observed: *Create Meta XR Bootstrap Scene* added the comprehensive rig, MRUK and the
+  Handover root, then stopped with `AssertionException: At GameObject HandSphereMap,
+  component FromHandPrefabDataSource. Required Hand Skeleton Provider reference is missing`.
+  The menu was never built and the scene stayed *Untitled* (never saved).
+- Cause (my bug, confirmed in the 207.0.1 sources): the builder read `Hand.Handedness` on
+  every exact-type `Hand`. That property evaluates `GetData()`, and the rig's synthetic
+  HandSphereMap hand is fed by a `FromHandPrefabDataSource` whose skeleton provider is only
+  assigned in `Awake`, so in Edit mode it throws. The same loop also ran at runtime in
+  `Awake`, and could have picked that synthetic hand (it always reports itself as tracked).
+- Fix: `MetaRigHands` selects only exact-type `Hand`s whose modifier chain ends at
+  `FromOVRHandDataSource`, following serialized references without evaluating data. The
+  builder reads the side from that source's serialized `_handedness`; the runtime fallback
+  searches on the first `Poll` (after every `Start`). Sampling uses the wired side, not
+  `Hand.Handedness`. Each builder step now reports its own failure and the scene is always
+  saved. Evidence: the compile check passes (7/7) with the data-source types added to the stubs;
+  the core suite still passes (163). **Not yet re-run in the Editor.**

@@ -15,9 +15,10 @@ namespace Handover.EditorTools.MetaSetup
     /// <summary>
     /// Builds the persistent Bootstrap scene for Quest: the Interaction SDK comprehensive rig
     /// (via Meta's Quick Actions, the documented path), passthrough, MRUK, and the Handover app
-    /// wired to the rig's hands, with the hand menu made ray- and poke-interactable.
-    /// Afterwards run Meta > Tools > Project Setup Tool > Fix All for Android and Standalone.
+    /// wired to the rig's tracked hands, with the hand menu made ray- and poke-interactable.
+    /// Afterwards run Window > Meta > Tools > Project Setup Tool > Fix All for Android and Windows.
     /// Every call used here was checked against the 207.0.1 package sources; verify in Play mode.
+    /// A failing step is reported and skipped so the scene is always saved; rerunning rebuilds it.
     /// </summary>
     public static class HandoverMetaSceneBuilder
     {
@@ -32,6 +33,7 @@ namespace Handover.EditorTools.MetaSetup
             }
 
             var report = new StringBuilder("[Handover] Bootstrap scene\n");
+            int failures = 0;
             Scene scene = EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
 
             // Interaction SDK brings its own camera rig.
@@ -41,15 +43,19 @@ namespace Handover.EditorTools.MetaSetup
                 Object.DestroyImmediate(defaultCamera);
             }
 
-            OVRQuickActionsAPI.AddOVRInteractionRig();
-            report.AppendLine("- Added the OVR comprehensive interaction rig (Quick Actions).");
-
-            ConfigurePassthrough(report);
-            ConfigureProjectFeatures(report);
-
-            var mrukGo = new GameObject("MRUK");
-            mrukGo.AddComponent<MRUK>();
-            report.AppendLine("- Added MRUK (scene data from the device; the app falls back to a virtual tabletop).");
+            failures += Step(report, "add the interaction rig", () =>
+            {
+                OVRQuickActionsAPI.AddOVRInteractionRig();
+                report.AppendLine("- Added the OVR comprehensive interaction rig (Quick Actions).");
+            });
+            failures += Step(report, "enable passthrough", () => ConfigurePassthrough(report));
+            failures += Step(report, "set the project features", () => ConfigureProjectFeatures(report));
+            failures += Step(report, "add MRUK", () =>
+            {
+                var mrukGo = new GameObject("MRUK");
+                mrukGo.AddComponent<MRUK>();
+                report.AppendLine("- Added MRUK (scene data from the device; the app falls back to a virtual tabletop).");
+            });
 
             var root = new GameObject("Handover");
             HandoverApp app = root.AddComponent<HandoverApp>();
@@ -59,34 +65,68 @@ namespace Handover.EditorTools.MetaSetup
             HandoverEditorUtility.SetReference(app, "_handSource", hands);
             HandoverEditorUtility.SetReference(app, "_surfaceSource", surfaces);
             HandoverEditorUtility.SetReference(lifecycle, "_app", app);
-            WireHands(hands, report);
-
-            OVRCameraRig rig = Object.FindAnyObjectByType<OVRCameraRig>();
-            Transform centreEye = rig != null ? rig.transform.Find("TrackingSpace/CenterEyeAnchor") : null;
-            if (centreEye != null)
+            failures += Step(report, "wire the hands", () => WireHands(hands, report));
+            failures += Step(report, "find the centre eye", () =>
             {
-                HandoverEditorUtility.SetReference(app, "_viewer", centreEye);
-            }
-            else
-            {
-                report.AppendLine("- WARNING: CenterEyeAnchor not found; HandoverApp will use Camera.main.");
-            }
+                OVRCameraRig rig = Object.FindAnyObjectByType<OVRCameraRig>();
+                Transform centreEye = rig != null ? rig.transform.Find("TrackingSpace/CenterEyeAnchor") : null;
+                if (centreEye != null)
+                {
+                    HandoverEditorUtility.SetReference(app, "_viewer", centreEye);
+                }
+                else
+                {
+                    report.AppendLine("- WARNING: CenterEyeAnchor not found; HandoverApp will use Camera.main.");
+                }
+            });
 
             var menuGo = new GameObject("Handover Menu");
             HandoverMenu menu = menuGo.AddComponent<HandoverMenu>();
             HandoverEditorUtility.SetReference(menu, "_app", app);
-            menu.BuildLayout();
-            menu.Canvas.transform.SetPositionAndRotation(new Vector3(0f, 1.05f, 0.65f), Quaternion.identity);
-            QuickActionsAPI.AddRayCanvasInteraction(menu.Canvas.gameObject);
-            QuickActionsAPI.AddPokeCanvasInteraction(menu.Canvas.gameObject);
-            report.AppendLine("- Built the hand menu and added ray and poke canvas interaction (Quick Actions).");
+            failures += Step(report, "build the hand menu", () =>
+            {
+                menu.BuildLayout();
+                menu.Canvas.transform.SetPositionAndRotation(new Vector3(0f, 1.05f, 0.65f), Quaternion.identity);
+                report.AppendLine("- Built the hand menu.");
+            });
+            failures += Step(report, "make the menu ray- and poke-interactable", () =>
+            {
+                QuickActionsAPI.AddRayCanvasInteraction(menu.Canvas.gameObject);
+                QuickActionsAPI.AddPokeCanvasInteraction(menu.Canvas.gameObject);
+                report.AppendLine("- Added ray and poke canvas interaction to the menu (Quick Actions).");
+            });
 
             HandoverEditorUtility.EnsureFolder(HandoverEditorUtility.ScenesFolder);
             EditorSceneManager.SaveScene(scene, ScenePath);
             HandoverEditorUtility.AddSceneToBuild(ScenePath, first: true);
             report.AppendLine("- Saved " + ScenePath + " as the first build scene.");
-            report.AppendLine("Next: Meta > Tools > Project Setup Tool > Fix All (Android and Standalone), then Play with the XR Simulator. Zero Console errors is the bar.");
-            Debug.Log(report.ToString());
+            report.AppendLine(failures == 0
+                ? "Next: Window > Meta > Tools > Project Setup Tool > Fix All (Android and Windows tabs), then Play with the XR Simulator. Zero Console errors is the bar."
+                : $"{failures} step(s) FAILED (see the errors above). The scene was saved anyway; fix the cause and run this menu again.");
+            if (failures == 0)
+            {
+                Debug.Log(report.ToString());
+            }
+            else
+            {
+                Debug.LogWarning(report.ToString());
+            }
+        }
+
+        /// <summary>Runs one setup step; a failure is logged and reported instead of aborting the build.</summary>
+        private static int Step(StringBuilder report, string name, System.Action action)
+        {
+            try
+            {
+                action();
+                return 0;
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogException(e);
+                report.AppendLine($"- FAILED to {name}: {e.GetType().Name}: {e.Message}");
+                return 1;
+            }
         }
 
         private static void ConfigurePassthrough(StringBuilder report)
@@ -141,22 +181,31 @@ namespace Handover.EditorTools.MetaSetup
             report.AppendLine("- Project config: hand tracking (controllers and hands), scene support, passthrough support.");
         }
 
+        /// <summary>
+        /// Wires the rig's two tracked hands. Never reads <see cref="Hand.Handedness"/>: in Edit mode
+        /// that evaluates hand data and throws on the rig's synthetic HandSphereMap hands. The side
+        /// comes from the serialized <c>_handedness</c> of the hand's FromOVRHandDataSource instead.
+        /// </summary>
         private static void WireHands(MetaHandPoseSource source, StringBuilder report)
         {
             Hand left = null;
             Hand right = null;
-            foreach (Hand hand in Object.FindObjectsByType<Hand>(FindObjectsSortMode.None))
+            int found = 0;
+            foreach (Hand hand in MetaRigHands.FindTrackedRigHands())
             {
-                if (hand.GetType() != typeof(Hand))
+                found++;
+                var root = MetaRigHands.RootSource(hand) as Object;
+                SerializedProperty side = root != null ? new SerializedObject(root).FindProperty("_handedness") : null;
+                if (side == null)
                 {
                     continue;
                 }
 
-                if (hand.Handedness == Handedness.Left && left == null)
+                if (side.intValue == (int)Handedness.Left && left == null)
                 {
                     left = hand;
                 }
-                else if (hand.Handedness == Handedness.Right && right == null)
+                else if (side.intValue == (int)Handedness.Right && right == null)
                 {
                     right = hand;
                 }
@@ -164,9 +213,29 @@ namespace Handover.EditorTools.MetaSetup
 
             HandoverEditorUtility.SetReference(source, "_leftHand", left);
             HandoverEditorUtility.SetReference(source, "_rightHand", right);
-            report.AppendLine(left != null && right != null
-                ? $"- Wired hands: {left.name} (left), {right.name} (right). Confirm these are the rig's tracked hands."
-                : "- WARNING: could not find both ISDK Hand components; assign them on MetaHandPoseSource.");
+            if (left != null && right != null)
+            {
+                report.AppendLine($"- Wired the tracked hands: {HierarchyPath(left.transform)} (left), {HierarchyPath(right.transform)} (right).");
+                if (found > 2)
+                {
+                    report.AppendLine($"- WARNING: {found} tracked hands found; check the two wired on MetaHandPoseSource.");
+                }
+            }
+            else
+            {
+                report.AppendLine("- WARNING: could not find both tracked hands; MetaHandPoseSource will search on the first frame (or assign them in the Inspector).");
+            }
+        }
+
+        private static string HierarchyPath(Transform t)
+        {
+            string path = t.name;
+            for (Transform p = t.parent; p != null; p = p.parent)
+            {
+                path = p.name + "/" + path;
+            }
+
+            return path;
         }
     }
 }

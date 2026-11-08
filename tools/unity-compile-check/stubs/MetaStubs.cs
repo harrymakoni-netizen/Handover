@@ -72,7 +72,28 @@ namespace Oculus.Interaction.Input
         int CurrentDataVersion { get; }
         event Action WhenHandUpdated;
     }
-    public class Hand : MonoBehaviour, IHand
+    // Runtime/Scripts/Input/DataSource.cs, DataModifier.cs, Hands/HandDataAsset.cs,
+    // Hands/OVRHandPrimitives.cs (ICopyFrom), Hands/FromHandPrefabDataSource.cs and
+    // com.meta.xr.sdk.interaction.ovr Runtime/Scripts/Input/FromOVRHandDataSource.cs.
+    public interface ICopyFrom<in TSelfType> { void CopyFrom(TSelfType source); }
+    public interface IDataSource { int CurrentDataVersion { get; } }
+    public interface IDataSource<TData> : IDataSource { TData GetData(); }
+    public abstract class DataSource<TData> : MonoBehaviour, IDataSource<TData>
+        where TData : class, ICopyFrom<TData>, new()
+    {
+        public virtual int CurrentDataVersion => 0;
+        public TData GetData() => null;
+    }
+    public abstract class DataModifier<TData> : DataSource<TData>
+        where TData : class, ICopyFrom<TData>, new()
+    {
+        public virtual IDataSource<TData> ModifyDataFromSource => null;
+    }
+    public class HandDataAsset : ICopyFrom<HandDataAsset> { public void CopyFrom(HandDataAsset source) { } }
+    public class FromHandPrefabDataSource : DataSource<HandDataAsset> { }
+    public class FromOVRHandDataSource : DataSource<HandDataAsset> { }
+
+    public class Hand : DataModifier<HandDataAsset>, IHand
     {
         public Handedness Handedness => default;
         public bool IsConnected => false;
@@ -93,7 +114,6 @@ namespace Oculus.Interaction.Input
         public float GetFingerPinchStrength(HandFinger finger) => 0f;
         public bool IsTrackedDataValid => false;
         public bool GetRootPose(out Pose pose) { pose = default; return false; }
-        public int CurrentDataVersion => 0;
         public event Action WhenHandUpdated;
     }
 }

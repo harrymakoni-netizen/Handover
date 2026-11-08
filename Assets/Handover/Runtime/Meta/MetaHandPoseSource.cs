@@ -31,6 +31,8 @@ namespace Handover.MetaPlatform
         private readonly double[] _lastStamp = new double[2];
         private int _epoch;
         private bool _subscribed;
+        private float _nextSearchTime;
+        private bool _warnedMissingHands;
 
         public override int OriginEpoch => _epoch;
 
@@ -46,22 +48,23 @@ namespace Handover.MetaPlatform
         {
             _left = _leftHand as IHand;
             _right = _rightHand as IHand;
-            if (_left == null || _right == null)
-            {
-                FindRigHands();
-            }
         }
 
-        /// <summary>Picks the rig's top-level <see cref="Hand"/> components (exact type, not derived visuals).</summary>
+        /// <summary>
+        /// Fallback when the Inspector references are empty: the rig's tracked hands
+        /// (<see cref="MetaRigHands"/>). Runs from <see cref="Poll"/>, after every Start, because
+        /// <see cref="Hand.Handedness"/> evaluates hand data. Retries once a second.
+        /// </summary>
         private void FindRigHands()
         {
-            foreach (Hand hand in FindObjectsByType<Hand>(FindObjectsSortMode.None))
+            if (Time.unscaledTime < _nextSearchTime)
             {
-                if (hand.GetType() != typeof(Hand))
-                {
-                    continue;
-                }
+                return;
+            }
 
+            _nextSearchTime = Time.unscaledTime + 1f;
+            foreach (Hand hand in MetaRigHands.FindTrackedRigHands())
+            {
                 if (hand.Handedness == Handedness.Left && _left == null)
                 {
                     _left = hand;
@@ -72,9 +75,10 @@ namespace Handover.MetaPlatform
                 }
             }
 
-            if (_left == null || _right == null)
+            if ((_left == null || _right == null) && !_warnedMissingHands)
             {
-                Debug.LogWarning("[Handover] MetaHandPoseSource could not find both Interaction SDK hands; assign them in the Inspector.");
+                _warnedMissingHands = true;
+                Debug.LogWarning("[Handover] MetaHandPoseSource could not find both tracked Interaction SDK hands; assign them in the Inspector.");
             }
         }
 
@@ -103,6 +107,11 @@ namespace Handover.MetaPlatform
 
         public override void Poll()
         {
+            if (_left == null || _right == null)
+            {
+                FindRigHands();
+            }
+
             _samples[0] = Sample(HandId.Left, _left);
             _samples[1] = Sample(HandId.Right, _right);
         }
@@ -141,7 +150,7 @@ namespace Handover.MetaPlatform
 
         private bool TryPalmPose(HandId id, IHand hand, out Core.Pose3 palm)
         {
-            bool left = hand.Handedness == Handedness.Left;
+            bool left = id == HandId.Left;
             if (_usePalmJointRotation && hand.GetJointPose(HandJointId.HandPalm, out Pose joint))
             {
                 Vector3 palmar = left ? Oculus.Interaction.Input.Constants.LeftPalmar : Oculus.Interaction.Input.Constants.RightPalmar;

@@ -40,9 +40,12 @@ check. Record results in [`EvidenceLog.md`](EvidenceLog.md).
 
 - **Handover > Create Meta XR Bootstrap Scene** builds `Assets/Handover/Content/Scenes/Bootstrap.unity`:
   the Interaction SDK comprehensive rig (Meta's Quick Actions), passthrough, MRUK, the
-  Handover app wired to the rig's hands, and a hand menu with ray and poke interaction.
-  It logs a report; read the warnings.
-- Then **Meta > Tools > Project Setup Tool > Fix All** for Android *and* Standalone.
+  Handover app wired to the rig's two tracked hands, and a hand menu with ray and poke
+  interaction. It logs a report; read the warnings. A step that fails is reported and
+  skipped, and the scene is still saved; fix the cause and run the menu again (answer
+  **Don't Save** for the previous scene).
+- Then **Window > Meta > Tools > Project Setup Tool**, **Fix All** on the Android tab *and*
+  the Windows (desktop) tab.
 - **Handover > Create Greybox Scene (keyboard hands)** builds a desktop scene with keyboard
   palms on a virtual tabletop (no headset, no simulator).
 
@@ -79,7 +82,8 @@ the lantern), `Tab`, `1` (Pip), `2` (rest at R), `2`, `4` (harbour), `1` (Luma),
 
 ### Meta XR Simulator
 
-Enable the simulator from the Meta XR toolbar, open `Bootstrap.unity`, press Play.
+Install the standalone Meta XR Simulator and restart Unity, then **Window > Meta > Meta XR
+Simulator > Activate** (greyed out until it is installed). Open `Bootstrap.unity`, press Play.
 **Bar: zero errors and zero exceptions in the Console** (Interaction SDK asserts its
 wiring in `Start()`). Hand poses in the simulator are discrete, so use the greybox and the
 deterministic tests for fine thresholds. Simulator results are not hardware results.

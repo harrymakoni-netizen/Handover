@@ -5,6 +5,7 @@
         "Handover.Core",
         "Handover.Runtime",
         "Oculus.Interaction",
+        "Oculus.Interaction.OVR",
         "Oculus.VR",
         "meta.xr.mrutilitykit"
     ],
