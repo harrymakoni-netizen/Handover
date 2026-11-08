@@ -8,11 +8,12 @@ to fix a demonstrated defect, and record why here.
 
 | Item | Version | Why |
 | --- | --- | --- |
-| Unity Editor | **6000.3.28f1** (revision `8f082d2fe476`), LTS stream | Newest Unity 6 LTS patch on 6 Nov 2026. Meta's Unity setup guidance recommends Unity 6.1 or later; Meta XR Core SDK 207 requires at least 6000.0.66f2. |
+| Unity Editor | **6000.6.8f1** (revision `237b6593792b`), Supported stream | What the project actually runs on since 8 Nov 2026: the developer machine opened it with 6000.6.8f1 and it compiled and ran the greybox. Downgrading back to the originally pinned 6000.3.28f1 LTS is riskier than staying, so **everyone uses exactly 6000.6.8f1** for the rest of the sprint. Meta XR Core SDK 207 requires at least 6000.0.66f2; Meta recommends 6.1 or later. |
 | Editor modules | Android Build Support + OpenJDK + Android SDK & NDK Tools | Needed for the Quest APK. Install via Unity Hub. |
 
 `ProjectSettings/ProjectVersion.txt` pins the editor. Unity Hub offers to install
-it when you add the project.
+it when you add the project. (It was first committed as 6000.3.28f1; the developer's
+first-open commit records 6000.6.8f1.)
 
 ## Packages (`Packages/manifest.json`)
 
@@ -27,9 +28,9 @@ scope `com.meta.xr`), declared as a scoped registry in the manifest.
 | `com.unity.xr.openxr` | 1.18.0 | Meta's recommended XR provider path is the Unity OpenXR plugin (1.15.1 or later). 1.18.0 (Aug 2026) predates Meta 207.0.1; 1.19.0 is only 11 days old and was not chosen. |
 | `com.unity.xr.management` | 4.6.1 | Latest tagged release. |
 | `com.unity.inputsystem` | 1.20.1 | Used only by the Editor keyboard driver. |
-| `com.unity.render-pipelines.universal` | 17.3.0 | Core package bundled with 6000.3 (verified from the editor's built-in packages). |
-| `com.unity.test-framework` | 1.6.0 | Core package bundled with 6000.3 (uses `com.unity.ext.nunit` 2.0.3). |
-| `com.unity.ugui` | 2.0.0 | Core package bundled with 6000.3 (includes TextMesh Pro). |
+| `com.unity.render-pipelines.universal` | bundled with the editor | Core package. Pinned 17.3.0 for 6000.3; on 6000.6 Unity uses its own bundled version — `packages-lock.json` records the exact one. |
+| `com.unity.test-framework` | bundled with the editor | Core package (1.6.0 on 6000.3); see the lockfile. |
+| `com.unity.ugui` | bundled with the editor | Core package (2.0.0 on 6000.3, includes TextMesh Pro); see the lockfile. |
 | `com.unity.ide.rider` / `com.unity.ide.visualstudio` | 3.1.0 / 2.0.29 | Editor convenience only. |
 
 `Packages/packages-lock.json` does **not** exist yet. Unity writes it on the

@@ -9,7 +9,7 @@ Editor or simulator run as a headset result.
 
 | Gate | Deterministic (.NET / EditMode) | Editor / XR Simulator | Hardware (Quest 3) |
 | --- | --- | --- | --- |
-| A Setup | Keeper boarding starts play exactly once (tests); Unity-side code compiles against Unity 6000.3.28f1 assemblies (not in the Editor) | **Not run** — needs Unity 6000.3.28f1 on a developer machine ([Setup.md](Setup.md)) | Not run |
+| A Setup | Keeper boarding starts play exactly once (tests); Unity-side code compiles against Unity 6000.3.28f1 assemblies | **Partial (8 Nov):** opened in Unity 6000.6.8f1 on Windows, compiled, greybox scene built and ran in Play mode. Still to do: EditMode tests in Unity, URP, Bootstrap scene, XR Simulator, Android build | Not run |
 | B Carry and hop | 40 scripted hops, all three dolls, both directions; no loss, duplicate owner or leaked slot | Not run | Not run |
 | C Chapter logic | Both rescue orders and the replay solution finish; tutorial, pause, queued R closure and every checkpoint stay consistent (with weather) | Not run | Not run |
 | D Hardware | — | — | Not run (no headset available) |
@@ -157,3 +157,20 @@ Editor or simulator run as a headset result.
   fails with the old per-dock rule (mutation check) and passes now;
   `KeyboardWalkthroughTests` replays the documented key sequence with the driver's
   placement maths and completes the chapter.
+
+### First Editor run (developer machine, 8 Nov 2026)
+
+- Environment: Windows, Unity **6000.6.8f1** (DX11), Meta XR SDK 207 welcome window shown.
+  Evidence: the developer's screenshots; I did not see the full Console.
+- Observed: the project opened without Safe Mode; the **Handover** menu exists (Editor
+  assemblies compiled); *Create Greybox Scene* built `HandoverGreybox.unity`; Play mode
+  ran with the keyboard driver, the HUD reported live state (both synthetic palms
+  tracked and carry-eligible; Keeper, Pip and Luma at Departure; session paused from
+  the keyboard) and the hand menu rendered its Pause panel.
+- Problem found: the greybox's transparent pieces rendered **magenta** because no URP
+  asset was assigned and the material used a URP shader. Fixed: the material now picks
+  a built-in shader when no render pipeline asset is active (compile-checked); the URP
+  setup step is still required.
+- Meta's Project Setup Tool reported 4 outstanding items (expected before Fix All).
+- Not yet observed: EditMode tests in Unity, a full keyboard chapter, the Bootstrap
+  scene, the XR Simulator, an APK.

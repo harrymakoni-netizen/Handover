@@ -23,6 +23,7 @@ namespace Handover.Unity
 
         private static MaterialPropertyBlock _block;
         private static Material _transparent;
+        private static bool _transparentIsUrp;
         private static readonly int BaseColor = Shader.PropertyToID("_BaseColor");
         private static readonly int ColorId = Shader.PropertyToID("_Color");
 
@@ -92,12 +93,15 @@ namespace Handover.Unity
         /// <summary>URP Unlit set up for alpha blending; null when no suitable shader is available.</summary>
         public static Material TransparentMaterial()
         {
-            if (_transparent != null)
+            // URP shaders render magenta under the Built-in pipeline (before a URP asset is
+            // assigned), so pick the shader from the pipeline that is actually active.
+            bool urpActive = GraphicsSettings.currentRenderPipeline != null;
+            if (_transparent != null && _transparentIsUrp == urpActive)
             {
                 return _transparent;
             }
 
-            Shader shader = Shader.Find("Universal Render Pipeline/Unlit");
+            Shader shader = urpActive ? Shader.Find("Universal Render Pipeline/Unlit") : null;
             if (shader == null)
             {
                 shader = Shader.Find("Sprites/Default");
@@ -122,6 +126,7 @@ namespace Handover.Unity
 
             m.renderQueue = (int)RenderQueue.Transparent;
             _transparent = m;
+            _transparentIsUrp = urpActive;
             return m;
         }
 
