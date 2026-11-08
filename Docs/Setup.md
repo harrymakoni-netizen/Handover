@@ -6,8 +6,9 @@ check. Record results in [`EvidenceLog.md`](EvidenceLog.md).
 
 ## 1. Install
 
-1. Unity Hub, then **Unity 6000.3.28f1** with *Android Build Support* (+ OpenJDK and
-   Android SDK & NDK Tools). See [`Versions.md`](Versions.md).
+1. Unity Hub, then **Unity 6000.6.8f1** (the version the project now uses) with
+   *Android Build Support* (+ OpenJDK and Android SDK & NDK Tools). See
+   [`Versions.md`](Versions.md).
 2. Meta XR Simulator (Windows has full support; macOS hand tracking is limited):
    Meta Quest Developer Hub > Tools, or `metavr tools install xrsim`.
 
@@ -51,7 +52,10 @@ Commit the generated scenes and their `.meta` files once they work.
 
 ### Greybox (desktop, keyboard palms)
 
-Press Play in `HandoverGreybox.unity`. The HUD (O toggles it) shows the state.
+Press Play in `HandoverGreybox.unity`. The HUD (O toggles it) shows the state. If the
+water and dry areas look **magenta**, the URP asset from section 3 is not assigned yet
+(older builds of the greybox used a URP shader regardless; the current code falls back
+to a built-in shader).
 
 | Keys | Action |
 | --- | --- |
