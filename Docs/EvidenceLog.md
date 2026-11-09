@@ -231,3 +231,26 @@ Editor or simulator run as a headset result.
   TrackingSpace every frame (no floor collider), and MRUK's world lock moves it back, so head and
   hands jitter. Handover is seated: the Bootstrap builder now disables `FirstPersonLocomotor`
   (component off; Awake still runs). Compile check 7/7. Existing scenes: untick it by hand.
+- With `FirstPersonLocomotor` unticked by hand in the scene (9 Nov, about 21:26): 0 errors, 23
+  warnings instead of 999+, and the HUD reported the right hand **ok**, so simulated hand data
+  reaches `MetaHandPoseSource` (the left hand's state was cut off in the screenshot). The warnings
+  seen were the simulator's own: fallback chessboard passthrough (no synthetic environment) and
+  MRUK finding no scene data in the simulator. Not confirmed: whether the untick was saved
+  outside Play mode.
+- **Unresolved, developer machine:** after its window was closed, the standalone simulator app
+  (`MetaXRSimulator.exe`) no longer shows a window, on Play or when launched from Windows
+  (`xrsim://`, as the developer reports). Its runtime still serves Play mode. The SDK's Editor
+  code only sets `XR_RUNTIME_JSON` for the Unity process, so the project cannot be what stops the
+  app. A restart and a reinstall of the simulator are untried. Without the window there is no
+  head or hand control, so the hand menu, stage confirmation and boarding remain **not observed**
+  in the simulator.
+
+### Open items on the developer machine (as of 9 Nov 2026)
+
+1. Bootstrap scene: confirm `PlayerController` > *First Person Locomotor* is unticked and saved.
+2. Player Settings (PC tab) > *Run In Background* on (the committed settings still have it off).
+3. *Window > Meta > Meta XR Operator > Deactivate* (not needed; activated by Fix All).
+4. Delete `Assets/f.unity` if it was not saved on purpose (it looks like the first, broken scene).
+5. Simulator window: see above. Optional; do not let it block the build.
+6. Next milestone, independent of the simulator: an Android build (Gate A), then the EditMode
+   tests inside Unity and a headset run with `Docs/RemoteTestSheet.md`.
