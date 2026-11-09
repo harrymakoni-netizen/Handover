@@ -179,6 +179,11 @@ namespace Handover.EditorTools.MetaSetup
             config.insightPassthroughSupport = OVRProjectConfig.FeatureSupport.Supported;
             OVRProjectConfig.CommitProjectConfig(config);
             report.AppendLine("- Project config: hand tracking (controllers and hands), scene support, passthrough support.");
+
+            // Play mode stops updating while another window has focus unless Run In Background is
+            // on, and the Meta XR Simulator window takes focus whenever you use it. Android ignores it.
+            PlayerSettings.runInBackground = true;
+            report.AppendLine("- Player Settings: Run In Background on (keeps Play mode running while the simulator window has focus).");
         }
 
         /// <summary>

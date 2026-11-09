@@ -48,7 +48,7 @@ namespace Handover.EditorTools
             HandoverEditorUtility.SetReference(app, "_viewer", cameraGo.transform);
             HandoverEditorUtility.SetBool(app, "_autoConfirmStage", true);
             HandoverEditorUtility.SetBool(app, "_preferVirtualTabletop", true);
-            HandoverEditorUtility.SetBool(app, "_pauseOnFocusLossInEditor", false);
+            HandoverEditorUtility.SetBool(app, "_editorWindowFocusPauses", false);
             HandoverEditorUtility.SetReference(driver, "_app", app);
 
             HandoverEditorUtility.EnsureFolder(HandoverEditorUtility.ScenesFolder);

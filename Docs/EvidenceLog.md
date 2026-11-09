@@ -9,7 +9,7 @@ Editor or simulator run as a headset result.
 
 | Gate | Deterministic (.NET / EditMode) | Editor / XR Simulator | Hardware (Quest 3) |
 | --- | --- | --- | --- |
-| A Setup | Keeper boarding starts play exactly once (tests); Unity-side code compiles against Unity 6000.3.28f1 assemblies | **Partial (8 Nov):** opened in Unity 6000.6.8f1 on Windows, compiled, greybox scene built and ran in Play mode; URP asset assigned. Bootstrap builder failed on its first run (fixed, not yet re-run). Still to do: EditMode tests in Unity, Bootstrap scene, XR Simulator, Android build | Not run |
+| A Setup | Keeper boarding starts play exactly once (tests); Unity-side code compiles against Unity 6000.3.28f1 assemblies | **Partial (8 Nov):** opened in Unity 6000.6.8f1 on Windows, compiled, greybox scene built and ran in Play mode; URP asset assigned. **8–9 Nov:** Bootstrap scene built; Play mode with 0 errors and 0 warnings; Project Setup Tool required and recommended fixes applied; XR Simulator 2.0 runtime connected, hands shown. Still to do: hand menu and stage confirmation in the simulator, boarding (needs webcam hands or a headset), EditMode tests in Unity, Android build | Not run |
 | B Carry and hop | 40 scripted hops, all three dolls, both directions; no loss, duplicate owner or leaked slot | Not run | Not run |
 | C Chapter logic | Both rescue orders and the replay solution finish; tutorial, pause, queued R closure and every checkpoint stay consistent (with weather) | Not run | Not run |
 | D Hardware | — | — | Not run (no headset available) |
@@ -194,3 +194,28 @@ Editor or simulator run as a headset result.
   `Hand.Handedness`. Each builder step now reports its own failure and the scene is always
   saved. Evidence: the compile check passes (7/7) with the data-source types added to the stubs;
   the core suite still passes (163). **Not yet re-run in the Editor.**
+
+### Bootstrap scene, Project Setup Tool and XR Simulator (developer machine, 8–9 Nov 2026)
+
+- Environment: Windows, Unity 6000.6.8f1, Android platform, Meta XR Simulator 2.0 (standalone).
+  Evidence: the developer's screenshots; I have not seen every Console line.
+- The fixed builder (`aa8e080`) completed: its report was logged as a normal message (it logs a
+  warning when any step fails), 0 errors. The scene has the comprehensive rig, MRUK, Handover,
+  Handover Menu and ISDK's PointableCanvasModule.
+- Play mode without an XR runtime: **0 errors, 0 warnings** (Interaction SDK start-up asserts
+  passed; no "could not find both tracked hands" warning, so the hands are referenced); the HUD
+  showed the stage prompt.
+- Project Setup Tool: required and recommended fixes applied on both tabs; 6 manual-only items
+  remain. *Fix All* on the Windows tab also activated Meta XR Operator (not needed; harmless so far).
+- XR Simulator: "XR Simulator runtime enabled" with Unity in Play mode; inputs switched from
+  controllers to hands and both simulated hands rendered. Stage confirmation, the hand menu and
+  boarding are not yet observed.
+- Problem found (my bug): in the Editor, the Unity window losing OS focus (which happens whenever
+  you click into the simulator) raised `OnApplicationFocus(false)` and `OnApplicationPause(true)`;
+  both paused Handover, and Resume is refused without focus, so the game could not be played
+  from the simulator window. Also `runInBackground` was off, so Play mode stops updating while
+  another window has focus.
+- Fix: in the Editor, OS window focus is ignored unless *Editor Window Focus Pauses* is ticked
+  (renamed field, default off, so existing scenes drop the old `true`); the headset's focus and
+  mount signals still pause, and device behaviour is unchanged. The Bootstrap builder turns on
+  Run In Background. Compile check 7/7. Not yet re-run in the Editor.
