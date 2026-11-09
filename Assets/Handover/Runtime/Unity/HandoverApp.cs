@@ -34,7 +34,10 @@ namespace Handover.Unity
         [SerializeField] private bool _createGreyboxViews = true;
         [Tooltip("Keyboard shortcuts for desktop testing (pause, confirm, settings). Never required on device.")]
         [SerializeField] private bool _desktopShortcuts = true;
-        [SerializeField] private bool _pauseOnFocusLossInEditor = true;
+        [Tooltip("Editor only: treat the Unity window losing OS focus as losing app focus. Off by default because " +
+                 "the Meta XR Simulator window takes focus whenever you use it; the headset's own focus and mount " +
+                 "signals (MetaLifecycleBridge) still pause the game. On device this setting is ignored.")]
+        [SerializeField] private bool _editorWindowFocusPauses;
 
         [Header("Persistence")]
         [SerializeField] private bool _useSaveFile = true;
@@ -245,9 +248,13 @@ namespace Handover.Unity
             _lastState = state;
         }
 
+        // On device these follow the app lifecycle (system menu, headset off). In the Editor they
+        // follow the Unity window's OS focus, which is not the player's focus, so they are opt-in.
+        private bool IgnoresWindowFocus => Application.isEditor && !_editorWindowFocusPauses;
+
         private void OnApplicationFocus(bool hasFocus)
         {
-            if (Simulation == null || (Application.isEditor && !_pauseOnFocusLossInEditor))
+            if (Simulation == null || IgnoresWindowFocus)
             {
                 return;
             }
@@ -257,7 +264,7 @@ namespace Handover.Unity
 
         private void OnApplicationPause(bool paused)
         {
-            if (Simulation == null)
+            if (Simulation == null || IgnoresWindowFocus)
             {
                 return;
             }

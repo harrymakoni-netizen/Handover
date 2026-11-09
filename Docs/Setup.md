@@ -83,7 +83,18 @@ the lantern), `Tab`, `1` (Pip), `2` (rest at R), `2`, `4` (harbour), `1` (Luma),
 ### Meta XR Simulator
 
 Install the standalone Meta XR Simulator and restart Unity, then **Window > Meta > Meta XR
-Simulator > Activate** (greyed out until it is installed). Open `Bootstrap.unity`, press Play.
+Simulator > Activate** (greyed out until it is installed). Turn on **Edit > Project Settings >
+Player > (PC tab) Resolution and Presentation > Run In Background**: without it Play mode stops
+updating whenever the simulator window has focus (the Bootstrap builder now sets it). Open
+`Bootstrap.unity`, press Play. In the simulator window set **Left/Right input** to **Hand** and
+choose an environment with a table. The Unity window losing focus does not pause Handover in the
+Editor (`HandoverApp` > *Editor Window Focus Pauses* opts back in); the headset's focus and mount
+signals still do.
+
+Simulator controls (Meta's defaults): hold the right mouse button and move the mouse to look,
+WASD to move, arrow keys to turn; the hands follow the head; left mouse button pinches (selects),
+keys 1-4 switch aim / poke / pinch / grab. Keyboard hands cannot turn a palm face up, so boarding
+needs the simulator's **Webcam tracking** (your real hands) or a headset.
 **Bar: zero errors and zero exceptions in the Console** (Interaction SDK asserts its
 wiring in `Start()`). Hand poses in the simulator are discrete, so use the greybox and the
 deterministic tests for fine thresholds. Simulator results are not hardware results.
