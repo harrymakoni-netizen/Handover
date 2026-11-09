@@ -219,3 +219,15 @@ Editor or simulator run as a headset result.
   (renamed field, default off, so existing scenes drop the old `true`); the headset's focus and
   mount signals still pause, and device behaviour is unchanged. The Bootstrap builder turns on
   Run In Background. Compile check 7/7. Not yet re-run in the Editor.
+- Second simulator Play in the same Editor session (after choosing a synthetic environment):
+  999+ errors, `Unable to set TrackingOrigin Floor to Unity Input Subsystem` every frame and
+  `[OVRPlugin] [xrCreateReferenceSpace] session should not be XR_NULL_HANDLE`: no OpenXR session
+  was created. This matches Meta forum reports (simulator works once per Editor session; synthetic
+  environments with a floor-level origin). After restarting Unity, without an environment:
+  **0 errors**.
+- That run showed 999+ warnings: `MRUK EnableWorldLock is enabled and is controlling the tracking
+  space position. Tracking position was set to (0.00, -0.12…-0.20, 0.00)`. Cause, from the 207.0.1
+  sources: the comprehensive rig's ISDK `FirstPersonLocomotor` applies gravity and moves the
+  TrackingSpace every frame (no floor collider), and MRUK's world lock moves it back, so head and
+  hands jitter. Handover is seated: the Bootstrap builder now disables `FirstPersonLocomotor`
+  (component off; Awake still runs). Compile check 7/7. Existing scenes: untick it by hand.

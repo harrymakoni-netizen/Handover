@@ -4,6 +4,7 @@ using Handover.Unity;
 using Meta.XR.MRUtilityKit;
 using Oculus.Interaction.Editor.QuickActions;
 using Oculus.Interaction.Input;
+using Oculus.Interaction.Locomotion;
 using Oculus.Interaction.OVR.Editor.QuickActions;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -48,6 +49,7 @@ namespace Handover.EditorTools.MetaSetup
                 OVRQuickActionsAPI.AddOVRInteractionRig();
                 report.AppendLine("- Added the OVR comprehensive interaction rig (Quick Actions).");
             });
+            failures += Step(report, "switch off locomotion", () => DisableLocomotion(report));
             failures += Step(report, "enable passthrough", () => ConfigurePassthrough(report));
             failures += Step(report, "set the project features", () => ConfigureProjectFeatures(report));
             failures += Step(report, "add MRUK", () =>
@@ -127,6 +129,28 @@ namespace Handover.EditorTools.MetaSetup
                 report.AppendLine($"- FAILED to {name}: {e.GetType().Name}: {e.Message}");
                 return 1;
             }
+        }
+
+        /// <summary>
+        /// Handover is played seated. The comprehensive rig ships ISDK locomotion, whose
+        /// FirstPersonLocomotor applies gravity and moves the TrackingSpace every frame; with no floor
+        /// collider it pulls the player down while MRUK's world lock pulls the space back, which
+        /// floods the Console and jitters head and hands. Disabling the component stops its
+        /// Update/LateUpdate (it still runs Awake, so references stay valid).
+        /// </summary>
+        private static void DisableLocomotion(StringBuilder report)
+        {
+            int count = 0;
+            foreach (FirstPersonLocomotor locomotor in Object.FindObjectsByType<FirstPersonLocomotor>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            {
+                locomotor.enabled = false;
+                EditorUtility.SetDirty(locomotor);
+                count++;
+            }
+
+            report.AppendLine(count > 0
+                ? $"- Switched off the rig's locomotion ({count} FirstPersonLocomotor): Handover is played seated."
+                : "- WARNING: no FirstPersonLocomotor found; check the rig for locomotion that moves the TrackingSpace.");
         }
 
         private static void ConfigurePassthrough(StringBuilder report)

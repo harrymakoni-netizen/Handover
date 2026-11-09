@@ -118,6 +118,12 @@ namespace Oculus.Interaction.Input
     }
 }
 
+// com.meta.xr.sdk.interaction Runtime/Scripts/Interaction/Models/Locomotion/FirstPersonLocomotor.cs
+namespace Oculus.Interaction.Locomotion
+{
+    public class FirstPersonLocomotor : MonoBehaviour { }
+}
+
 public class OVRDisplay
 {
     public event System.Action RecenteredPose;
