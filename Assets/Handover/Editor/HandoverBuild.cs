@@ -95,7 +95,9 @@ namespace Handover.EditorTools
                 text.AppendLine($"- Time {result.totalTime.TotalMinutes:0.0} min, errors {result.totalErrors}, warnings {result.totalWarnings}.");
                 if (ok)
                 {
-                    text.AppendLine($"- APK: {Path.GetFullPath(TestApkPath)} ({result.totalSize / (1024f * 1024f):0.0} MB)");
+                    // BuildSummary.totalSize is not the size of the APK file, so read the file.
+                    long apkBytes = File.Exists(TestApkPath) ? new FileInfo(TestApkPath).Length : 0L;
+                    text.AppendLine($"- APK: {Path.GetFullPath(TestApkPath)} ({apkBytes / (1024f * 1024f):0.0} MB)");
                 }
                 else
                 {

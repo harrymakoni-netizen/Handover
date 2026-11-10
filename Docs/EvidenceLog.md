@@ -9,7 +9,7 @@ Editor or simulator run as a headset result.
 
 | Gate | Deterministic (.NET / EditMode) | Editor / XR Simulator | Hardware (Quest 3) |
 | --- | --- | --- | --- |
-| A Setup | Keeper boarding starts play exactly once (tests); Unity-side code compiles against Unity 6000.3.28f1 assemblies | **Partial (8 Nov):** opened in Unity 6000.6.8f1 on Windows, compiled, greybox scene built and ran in Play mode; URP asset assigned. **8–9 Nov:** Bootstrap scene built; Play mode with 0 errors and 0 warnings; Project Setup Tool required and recommended fixes applied; XR Simulator 2.0 runtime connected, hands shown. **10 Nov:** Android development APK built from the command line, 0 errors (compiles and packages only). Still to do: hand menu and stage confirmation in the simulator, boarding (needs webcam hands or a headset), EditMode tests in Unity | Not run |
+| A Setup | Keeper boarding starts play exactly once (tests); Unity-side code compiles against Unity 6000.3.28f1 assemblies; **10 Nov:** EditMode suite inside Unity 6000.6.8f1, 163/163 | **Partial (8 Nov):** opened in Unity 6000.6.8f1 on Windows, compiled, greybox scene built and ran in Play mode; URP asset assigned. **8–9 Nov:** Bootstrap scene built; Play mode with 0 errors and 0 warnings; Project Setup Tool required and recommended fixes applied; XR Simulator 2.0 runtime connected, hands shown. **10 Nov:** Android development APK built from the command line, 0 errors (compiles and packages only). Still to do: hand menu and stage confirmation in the simulator, boarding (needs webcam hands or a headset) | Not run |
 | B Carry and hop | 40 scripted hops, all three dolls, both directions; no loss, duplicate owner or leaked slot | Not run | Not run |
 | C Chapter logic | Both rescue orders and the replay solution finish; tutorial, pause, queued R closure and every checkpoint stay consistent (with weather) | Not run | Not run |
 | D Hardware | — | — | Not run (no headset available) |
@@ -268,6 +268,30 @@ Editor or simulator run as a headset result.
 - What this shows: the project compiles (IL2CPP) and packages for Android. It is **not** a
   headset test: the APK has not been installed or run on a Quest 3. Hardware column unchanged.
 
+### EditMode tests inside Unity and build follow-ups (developer machine, 10 Nov 2026)
+
+- Environment: Windows, Unity 6000.6.8f1, batch mode, commit `19b4354` plus the `HandoverBuild`
+  and `.gitignore` changes below. Deterministic evidence only.
+- EditMode tests in Unity (`-batchmode -runTests -testPlatform EditMode`): exit code 0,
+  **163 passed, 0 failed, 0 skipped** (`Logs/editmode-results.xml`, not committed). No compiler
+  errors in the log, so the Unity-side assemblies, including the changed `HandoverBuild`, compile
+  in the real Editor.
+- `tools/run-core-tests.sh`: **163 passed, 0 failed**. This machine has only the .NET 10 runtime,
+  so the net8.0 test project needed `DOTNET_ROLL_FORWARD=Major`; without it the run aborts before
+  any test.
+- `tools/unity-compile-check/run.sh` against the 6000.6.8f1 editor: **did not work, not a
+  result**. It is written for 6000.3 (the bundled uGUI source in 6000.6 uses types the check
+  does not reference) and its stub paths do not resolve under Git Bash on Windows
+  (`C:\c/Users/...`). The Editor compile above covers the same code on this machine.
+- `HandoverBuild` now reports the APK size from the file on disk instead of
+  `BuildSummary.totalSize`. Compiled, but not exercised: no new Android build was run.
+- The 7 build warnings, read from the build log: URP Terrain shaders with all subshaders removed
+  on Android (not used by Handover), and CS0618 at `MetaRigHands.cs(45)`:
+  `FindObjectsByType<T>(FindObjectsSortMode)` is obsolete in 6000.6. Left as is, because the
+  replacement overload has not been checked against 6000.3.
+- `.utmp/` (temporary files that appeared beside the build; origin not established) is now
+  ignored by git.
+
 ### Open items on the developer machine (as of 10 Nov 2026)
 
 1. Bootstrap scene: confirm `PlayerController` > *First Person Locomotor* is unticked and saved.
@@ -275,7 +299,8 @@ Editor or simulator run as a headset result.
 3. *Window > Meta > Meta XR Operator > Deactivate* (not needed; activated by Fix All).
 4. Delete `Assets/f.unity` if it was not saved on purpose (it looks like the first, broken scene).
 5. Simulator window: see above. Optional; do not let it block the build.
-6. Android build: done on 10 Nov (see above). Next, independent of the simulator: the EditMode
-   tests inside Unity and a headset run with `Docs/RemoteTestSheet.md`.
-7. Review the files changed after the build before committing them; correct the APK size line
-   in `HandoverBuild`.
+6. Android build and EditMode tests inside Unity: done on 10 Nov (see above). Next, independent
+   of the simulator: a headset run with `Docs/RemoteTestSheet.md` (needs a Quest 3).
+7. `MetaRigHands.cs(45)`: replace the obsolete `FindObjectsByType` overload once the new one is
+   confirmed in the installed Unity source.
+8. `tools/unity-compile-check` does not run against 6000.6 or under Git Bash on Windows.
