@@ -76,6 +76,14 @@ namespace Handover.Unity
 
         private void Awake()
         {
+#if UNITY_EDITOR
+            // Play mode stops updating while another window (the Meta XR Simulator) has focus
+            // unless Run In Background is on. Editor only; a headset ignores the setting.
+            if (!_editorWindowFocusPauses)
+            {
+                Application.runInBackground = true;
+            }
+#endif
             ChapterDefinition chapter = ChapterDefinition.CreateDefault();
             if (_handSource == null)
             {

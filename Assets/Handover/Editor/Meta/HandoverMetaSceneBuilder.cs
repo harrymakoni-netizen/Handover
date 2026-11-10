@@ -143,8 +143,9 @@ namespace Handover.EditorTools.MetaSetup
             int count = 0;
             foreach (FirstPersonLocomotor locomotor in Object.FindObjectsByType<FirstPersonLocomotor>(FindObjectsInactive.Include, FindObjectsSortMode.None))
             {
-                locomotor.enabled = false;
-                EditorUtility.SetDirty(locomotor);
+                // Through SerializedObject: the locomotor sits in a nested prefab instance, and only a
+                // recorded override survives saving the scene. HandoverSeatedPlayProcessor is the backstop.
+                HandoverEditorUtility.SetBool(locomotor, "m_Enabled", false);
                 count++;
             }
 
