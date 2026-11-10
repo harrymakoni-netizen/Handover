@@ -1960,7 +1960,7 @@ RectTransform:
   - {fileID: 510684777}
   - {fileID: 614211378}
   - {fileID: 1827934198}
-  m_Father: {fileID: 2128814112}
+  m_Father: {fileID: 7562359961156090737}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -2007,7 +2007,7 @@ MonoBehaviour:
   _surfaceTimeout: 5
   _createGreyboxViews: 1
   _desktopShortcuts: 1
-  _pauseOnFocusLossInEditor: 1
+  _editorWindowFocusPauses: 0
   _useSaveFile: 1
 --- !u!114 &1068567715
 MonoBehaviour:
@@ -4305,8 +4305,7 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 899894298}
+  m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &512261497056502880
@@ -6167,6 +6166,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 2134403252303834794}
     - target: {fileID: 3162065387456349882, guid: 46fdef3df9a5a354caf7692f85e5eff2, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3162065387456349882, guid: 46fdef3df9a5a354caf7692f85e5eff2, type: 3}
       propertyPath: _playerEyes
       value: 
       objectReference: {fileID: 1460830101}
@@ -6324,7 +6327,10 @@ PrefabInstance:
       objectReference: {fileID: 1460830104}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 5568758619435239319, guid: 46fdef3df9a5a354caf7692f85e5eff2, type: 3}
+      insertIndex: 2
+      addedObject: {fileID: 899894298}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 46fdef3df9a5a354caf7692f85e5eff2, type: 3}
 --- !u!4 &7562359961156090737 stripped

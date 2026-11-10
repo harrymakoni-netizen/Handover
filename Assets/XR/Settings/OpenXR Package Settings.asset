@@ -496,16 +496,7 @@ MonoBehaviour:
   required: 0
   customRuntimeLoaderName: 
   m_ApiLayers:
-    m_Collection:
-    - m_Json:
-        name: XR_APILAYER_METAX_operator
-        library_path: ./XrApiLayer_METAX_operator.dll
-        api_version: 1.1
-        implementation_version: 1
-        description: API layer that providing agentic interface for OpenXR
-      m_JsonFileName: XrApiLayer_METAX_operator.json
-      m_LibraryArchitecture: 1
-      m_IsEnabled: 1
+    m_Collection: []
 --- !u!114 &-3593262655421187436
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1558,40 +1549,40 @@ MonoBehaviour:
   m_Name: Standalone
   m_EditorClassIdentifier: Unity.XR.OpenXR::UnityEngine.XR.OpenXR.OpenXRSettings
   features:
-  - {fileID: 5412256351338057339}
-  - {fileID: 5087044299023291695}
-  - {fileID: 2979621487004183405}
-  - {fileID: 4819042407331357089}
-  - {fileID: -4084164180448385865}
-  - {fileID: 2666141830243468139}
-  - {fileID: -392607027833199530}
-  - {fileID: 5159351155186376914}
-  - {fileID: -5207018142200117767}
-  - {fileID: 4513393291056556942}
-  - {fileID: -8158057497388562583}
-  - {fileID: -1897968623094210596}
-  - {fileID: 440794548277977046}
-  - {fileID: 2189181635461958997}
-  - {fileID: 8450091026033608835}
-  - {fileID: -5102105593711368470}
-  - {fileID: -3593262655421187436}
-  - {fileID: 3820282769850143199}
-  - {fileID: 7716305837398799665}
   - {fileID: -3630558088521489221}
-  - {fileID: -6841264206705041934}
-  - {fileID: -5805033899672267161}
-  - {fileID: -1350735718664454610}
-  - {fileID: 4579198898954595704}
-  - {fileID: 140169775670805391}
-  - {fileID: -5880199706277626220}
-  - {fileID: 547325884803511592}
+  - {fileID: 4819042407331357089}
+  - {fileID: 7716305837398799665}
+  - {fileID: 2189181635461958997}
+  - {fileID: 440794548277977046}
+  - {fileID: -5207018142200117767}
   - {fileID: 5041748523419450775}
-  - {fileID: 4485052992852767538}
-  - {fileID: -3121582667017109191}
-  - {fileID: -8171315190872933035}
-  - {fileID: 7526818526088505803}
   - {fileID: 7806538376044034883}
+  - {fileID: 3820282769850143199}
+  - {fileID: -5805033899672267161}
+  - {fileID: 7526818526088505803}
+  - {fileID: 5159351155186376914}
+  - {fileID: -392607027833199530}
+  - {fileID: -1350735718664454610}
+  - {fileID: -6841264206705041934}
+  - {fileID: -8171315190872933035}
+  - {fileID: 2666141830243468139}
+  - {fileID: -5880199706277626220}
+  - {fileID: 140169775670805391}
+  - {fileID: 2979621487004183405}
+  - {fileID: -5102105593711368470}
+  - {fileID: 8450091026033608835}
+  - {fileID: -1897968623094210596}
+  - {fileID: -8158057497388562583}
   - {fileID: -9086187657770535943}
+  - {fileID: 4485052992852767538}
+  - {fileID: 5087044299023291695}
+  - {fileID: 4579198898954595704}
+  - {fileID: 4513393291056556942}
+  - {fileID: 547325884803511592}
+  - {fileID: 5412256351338057339}
+  - {fileID: -3593262655421187436}
+  - {fileID: -3121582667017109191}
+  - {fileID: -4084164180448385865}
   customLoaderName: 
   m_renderMode: 1
   m_latencyOptimization: 0

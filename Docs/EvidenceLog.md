@@ -9,7 +9,7 @@ Editor or simulator run as a headset result.
 
 | Gate | Deterministic (.NET / EditMode) | Editor / XR Simulator | Hardware (Quest 3) |
 | --- | --- | --- | --- |
-| A Setup | Keeper boarding starts play exactly once (tests); Unity-side code compiles against Unity 6000.3.28f1 assemblies | **Partial (8 Nov):** opened in Unity 6000.6.8f1 on Windows, compiled, greybox scene built and ran in Play mode; URP asset assigned. **8–9 Nov:** Bootstrap scene built; Play mode with 0 errors and 0 warnings; Project Setup Tool required and recommended fixes applied; XR Simulator 2.0 runtime connected, hands shown. Still to do: hand menu and stage confirmation in the simulator, boarding (needs webcam hands or a headset), EditMode tests in Unity, Android build | Not run |
+| A Setup | Keeper boarding starts play exactly once (tests); Unity-side code compiles against Unity 6000.3.28f1 assemblies | **Partial (8 Nov):** opened in Unity 6000.6.8f1 on Windows, compiled, greybox scene built and ran in Play mode; URP asset assigned. **8–9 Nov:** Bootstrap scene built; Play mode with 0 errors and 0 warnings; Project Setup Tool required and recommended fixes applied; XR Simulator 2.0 runtime connected, hands shown. **10 Nov:** Android development APK built from the command line, 0 errors (compiles and packages only). Still to do: hand menu and stage confirmation in the simulator, boarding (needs webcam hands or a headset), EditMode tests in Unity | Not run |
 | B Carry and hop | 40 scripted hops, all three dolls, both directions; no loss, duplicate owner or leaked slot | Not run | Not run |
 | C Chapter logic | Both rescue orders and the replay solution finish; tutorial, pause, queued R closure and every checkpoint stay consistent (with weather) | Not run | Not run |
 | D Hardware | — | — | Not run (no headset available) |
@@ -245,12 +245,37 @@ Editor or simulator run as a headset result.
   head or hand control, so the hand menu, stage confirmation and boarding remain **not observed**
   in the simulator.
 
-### Open items on the developer machine (as of 9 Nov 2026)
+### First Android test build (developer machine, 10 Nov 2026)
+
+- Environment: Windows, Unity 6000.6.8f1, batch mode, commit `092902b` plus the developer's
+  uncommitted changes to the Bootstrap scene and project settings. Evidence: the build log
+  (`Logs/handover-android-build.log`, not committed) and the APK on disk.
+- Command: `Unity -batchmode -quit -projectPath . -buildTarget Android -executeMethod
+  Handover.EditorTools.HandoverBuild.BuildAndroidTestApkBatch -logFile ...`.
+- First attempt did not start: Unity exited with code 198, `No valid Unity Editor license found`
+  (Unity Hub was not running or signed in). Not a project fault. After the developer signed in
+  to the Hub and the Editor was closed, the second attempt ran.
+- Result: `[Handover] Android test build SUCCEEDED`, exit code 0, **0 errors, 7 warnings**
+  (warnings not inspected), 36.4 min for a first build. Development build, debug-signed, scene
+  Bootstrap only, package `com.DefaultCompany.Handover`, version 1.0 (1).
+- Output: `Builds/Handover-test.apk`, 91,199,946 bytes (87 MB). The build summary printed
+  1213.3 MB: `BuildSummary.totalSize` is not the size of the APK file, so that line of the
+  report is misleading and should be corrected.
+- The working tree showed further changes afterwards that were not made by hand in this
+  session (`Assets/HandoverURP.asset`, `Assets/Oculus/OculusProjectConfig.asset`,
+  `Assets/UniversalRenderPipelineGlobalSettings.asset`, new `Assets/Resources/OVRBuildConfig.asset`,
+  `.utmp/`). Whether the build or the earlier Editor session wrote them is not established.
+- What this shows: the project compiles (IL2CPP) and packages for Android. It is **not** a
+  headset test: the APK has not been installed or run on a Quest 3. Hardware column unchanged.
+
+### Open items on the developer machine (as of 10 Nov 2026)
 
 1. Bootstrap scene: confirm `PlayerController` > *First Person Locomotor* is unticked and saved.
 2. Player Settings (PC tab) > *Run In Background* on (the committed settings still have it off).
 3. *Window > Meta > Meta XR Operator > Deactivate* (not needed; activated by Fix All).
 4. Delete `Assets/f.unity` if it was not saved on purpose (it looks like the first, broken scene).
 5. Simulator window: see above. Optional; do not let it block the build.
-6. Next milestone, independent of the simulator: an Android build (Gate A), then the EditMode
+6. Android build: done on 10 Nov (see above). Next, independent of the simulator: the EditMode
    tests inside Unity and a headset run with `Docs/RemoteTestSheet.md`.
+7. Review the files changed after the build before committing them; correct the APK size line
+   in `HandoverBuild`.
